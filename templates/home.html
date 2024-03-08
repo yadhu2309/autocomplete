@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>AutoComplete</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <!-- <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+     -->
+</head>
+<body>
+    <style> ul{
+        list-style: none;
+        padding:0;
+    }
+    .list{
+        width: 100%;
+        background-color: #252525;
+        position: absolute;
+        color:white
+    }
+    .list-items{
+        padding: 12px;
+
+    }
+    .list-items:hover {
+        background-color: rgb(76, 95, 111);
+      }
+</style>
+    <input type="text" id="productInput"/>
+    <ul class='list'></ul>
+    <script >
+       let product_list
+        // ;
+
+
+let input = document.getElementById('productInput');
+
+// Add event listener for keyup event on input
+input.addEventListener('keyup', async(e) => {
+    // Remove existing list items
+    try{
+    let searchQuery = input.value.trim();
+
+    let url = `http://127.0.0.1:8000/home/?search=${encodeURIComponent(searchQuery)}`;
+
+// Fetch data from the URL using the GET method
+let response = await fetch(url);
+
+
+   
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+      
+ 
+        let data = await response.json();
+
+product_list = data.payload
+product_list.sort((a, b) => a.name.localeCompare(b.name))
+console.log(product_list)}
+    
+    catch(error) {
+        // Handle errors
+        console.error('There was a problem with the fetch operation:', error);
+    };
+    removeElements();
+
+    for (let product of product_list) {
+        if (product.name.toLowerCase().includes(input.value.toLowerCase()) && input.value !== '') {
+            // Create a new list item
+            let listItem = document.createElement('li');
+            listItem.classList.add('list-items');
+            listItem.style.cursor = 'pointer';
+            listItem.setAttribute('onclick', `displayNames('${product.name}','${product.id}')`);
+
+
+            // Highlight the matching part of the product name
+            let highlightedName = product.name.replace(new RegExp(input.value, "gi"), (match) => `<b style=color:green>${match}</b>`);
+
+           listItem.innerHTML = highlightedName;
+
+            // Append the list item to the list container
+            document.querySelector('.list').appendChild(listItem);
+        }
+    }
+});
+
+
+
+function displayNames(value_name,value_id){
+    input.value = value_name
+    inputHidden.value = value_id
+    removeElements()
+}
+
+// Function to remove existing list items
+function removeElements(){
+let items = document.querySelectorAll(".list-items")
+items.forEach((item)=>{
+    item.remove()
+})
+}
+</script>
+    </script>
+</body>
+</html>
